@@ -1,0 +1,44 @@
+.vds-captions {
+  z-index: 10;
+  bottom: 0;
+  transition: all 0.3s ease;
+  font-family: 'Arial', sans-serif;
+
+  /* Modern caption styling */
+  --media-captions-padding: 2%;
+  --media-cue-backdrop: blur(10px);
+  --media-cue-bg: rgba(0, 0, 0, 0.75);
+  --media-cue-border-radius: 8px;
+  --media-cue-border: 1px solid rgba(255, 255, 255, 0.1);
+  --media-cue-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --media-cue-color: #ffffff;
+  --media-cue-display-bg: rgba(0, 0, 0, 0.5);
+  --media-cue-display-border-radius: 4px;
+  --media-cue-display-padding: 4px 8px;
+  --media-cue-font-size: calc(var(--overlay-height) / 100 * 4);
+  --media-cue-line-height: 1.4;
+  --media-cue-padding-x: 12px;
+  --media-cue-padding-y: 8px;
+}
+
+/* Pull captions up when controls are visible */
+.media-player[data-controls] .vds-captions {
+  bottom: 80px;
+  transform: translateY(0);
+}
+
+/* Hide captions when interacting with time slider */
+.media-player[data-preview] .vds-captions {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Add smooth transition for caption changes */
+.vds-captions [data-cue] {
+  transition: all 0.2s ease;
+}
+
+/* Improve readability with text shadow */
+.vds-captions [data-cue] {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
