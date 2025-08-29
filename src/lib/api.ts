@@ -44,14 +44,9 @@ export const generateQRCode = async (deviceInfo: string): Promise<QRCodeData> =>
 
     const responseData = await response.json()
 
-    // Debug: Log the response to see the actual structure
-    console.log('API Response:', JSON.stringify(responseData, null, 2))
-
-    // Try different response structures
     if (responseData.data?.qr_code) {
       return responseData.data.qr_code
     } else if (responseData.data?.qr_code_image) {
-      // Direct QR code data
       return responseData.data
     } else if (responseData.qr_code_image) {
       // QR code data at root level

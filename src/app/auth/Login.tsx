@@ -91,8 +91,8 @@ const Login = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-tr from-violet-950 via-black to-indigo-950 flex items-center justify-center p-4">
-            <div className="max-w-md w-full space-y-6">
+        <div className="min-h-screen bg-gradient-to-tr from-violet-950 via-black to-indigo-950 flex items-center justify-center p-4 relative">
+            <div className="max-w-md w-full space-y-6 z-10">
                 <div className="relative">
                     <div className="bg-gradient-to-br from-violet-950 via-black/30 to-indigo-950 rounded-2xl p-8 animate-pulse-shadow">
                     {/* Header */}
