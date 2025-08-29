@@ -6,8 +6,22 @@ interface UseQRCodePanelOptions {
   deviceInfo?: string
 }
 
-export const useQRCodePanel = ({ deviceInfo = 'Web App v1.0' }: UseQRCodePanelOptions = {}) => {
+const getDeviceInfo = (): string => {
+  const userAgent = navigator.userAgent
+  const platform = navigator.platform
+  const language = navigator.language
+  
+  const screenResolution = typeof window !== 'undefined' && window.screen 
+    ? `${window.screen.width}x${window.screen.height}`
+    : 'Unknown'
+  
+  return `Browser: ${userAgent.split(' ').slice(-2).join(' ')}, Platform: ${platform}, Language: ${language}, Screen: ${screenResolution}`
+}
+
+export const useQRCodePanel = ({ deviceInfo }: UseQRCodePanelOptions = {}) => {
   const [isOpen, setIsOpen] = useState(false)
+  
+  const finalDeviceInfo = deviceInfo || getDeviceInfo()
 
   const {
     data: qrData,
@@ -16,19 +30,19 @@ export const useQRCodePanel = ({ deviceInfo = 'Web App v1.0' }: UseQRCodePanelOp
     refetch,
     isFetching
   } = useQuery({
-    queryKey: ['qr-code', deviceInfo],
-    queryFn: () => generateQRCode(deviceInfo),
+    queryKey: ['qr-code', finalDeviceInfo],
+    queryFn: () => generateQRCode(finalDeviceInfo),
     enabled: isOpen,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
-      // Retry up to 2 times for network errors
       return failureCount < 2 && !(error instanceof Error && error.message.includes('Invalid response'))
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   })
 
   const togglePanel = () => {
+    refetch()
     setIsOpen(!isOpen)
   }
 
