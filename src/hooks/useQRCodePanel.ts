@@ -7,20 +7,17 @@ interface UseQRCodePanelOptions {
 }
 
 const getDeviceInfo = (): string => {
-  const userAgent = navigator.userAgent
-  const platform = navigator.platform
-  const language = navigator.language
-  
-  const screenResolution = typeof window !== 'undefined' && window.screen 
+  const { userAgent, platform, language } = navigator
+  const screenResolution = typeof window !== 'undefined' && window.screen
     ? `${window.screen.width}x${window.screen.height}`
     : 'Unknown'
-  
+
   return `Browser: ${userAgent.split(' ').slice(-2).join(' ')}, Platform: ${platform}, Language: ${language}, Screen: ${screenResolution}`
 }
 
 export const useQRCodePanel = ({ deviceInfo }: UseQRCodePanelOptions = {}) => {
   const [isOpen, setIsOpen] = useState(false)
-  
+
   const finalDeviceInfo = deviceInfo || getDeviceInfo()
 
   const {

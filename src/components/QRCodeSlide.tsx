@@ -24,7 +24,7 @@ export const QRCodeSlide: React.FC<QRCodeSlideProps> = ({
       {/* Slide Panel */}
       {isOpen && (
         <div
-          className={`absolute top-0 right-0 h-full w-80 bg-gradient-to-br from-black via-black/95 to-indigo-800 shadow-2xl  transform transition-transform duration-300 ease-in-out rounded-r-2xl overflow-hidden translate-x-full z-50
+          className={`absolute  top-0 right-0 h-full w-80 bg-gradient-to-br from-black via-black/95 to-indigo-800 shadow-2xl  transform transition-transform duration-300 ease-in-out rounded-r-2xl overflow-hidden translate-x-full z-50
             }`}
         >
           {/* Content */}

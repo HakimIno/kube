@@ -7,8 +7,8 @@ import { QueryProvider } from "@/components/QueryProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VidStack App",
-  description: "A modern video streaming platform",
+  title: "kube",
+  description: "video streaming platform",
 };
 
 export default function RootLayout({
