@@ -22,7 +22,7 @@ export const sidebarItems: SidebarItem[] = [
 ];
 
 export const subscriptions: Subscription[] = [
-  { id: '1', name: 'Channel 1', avatar: 'https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png' },
-  { id: '2', name: 'Channel 2', avatar: 'https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png' },
-  { id: '3', name: 'Channel 3', avatar: 'https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png' },
+          { id: '1', name: 'Channel 1', avatar: '/avatar-placeholder.svg' },
+        { id: '2', name: 'Channel 2', avatar: '/avatar-placeholder.svg' },
+        { id: '3', name: 'Channel 3', avatar: '/avatar-placeholder.svg' },
 ]; 

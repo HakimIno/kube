@@ -1,5 +1,7 @@
 "use client";
 
+import React from 'react';
+import { useParams } from 'next/navigation';
 import '@vidstack/react/player/styles/default/theme.css';
 import '@vidstack/react/player/styles/default/layouts/video.css';
 import { MainLayout } from '@/components/MainLayout';
@@ -8,35 +10,30 @@ import { VideoInfo } from '@/components/VideoInfo';
 import { ChannelInfo } from '@/components/ChannelInfo';
 import { RecommendedVideos } from '@/components/RecommendedVideos';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { getVideoById, getRecommendedVideos } from '@/data/videos';
 
-const recommendedVideos = [
-  {
-    id: '1',
-    title: 'Another Exciting Video',
-    thumbnail: 'https://files.vidstack.io/sprite-fight/poster.webp',
-    channelName: 'Channel Name',
-    views: '500K views',
-    uploadTime: '1 week ago'
-  },
-  {
-    id: '2',
-    title: 'Amazing Animation Showcase',
-    thumbnail: 'https://i.ytimg.com/vi/DjG1E4n0PcA/maxresdefault.jpg',
-    channelName: 'Animation Studio',
-    views: '1.2M views',
-    uploadTime: '2 weeks ago'
-  },
-  {
-    id: '3',
-    title: 'Creative Design Process',
-    thumbnail: 'https://i.ytimg.com/vi/YJpeMcWenNY/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCH52bhcWng5jwTtmQlzYiKhiizlA',
-    channelName: 'Design Channel',
-    views: '300K views',
-    uploadTime: '3 days ago'
+const Watch = () => {
+  const params = useParams();
+  const videoId = params.videoId as string;
+  
+  const video = getVideoById(videoId);
+  const recommendedVideos = getRecommendedVideos(videoId, 10);
+
+  if (!video) {
+    return (
+      <ProtectedRoute>
+        <MainLayout>
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-white mb-4">Video Not Found</h1>
+              <p className="text-gray-400">The video you're looking for doesn't exist.</p>
+            </div>
+          </div>
+        </MainLayout>
+      </ProtectedRoute>
+    );
   }
-];
 
-export default function Home() {
   return (
     <ProtectedRoute>
       <MainLayout>
@@ -56,4 +53,6 @@ export default function Home() {
       </MainLayout>
     </ProtectedRoute>
   );
-}
+};
+
+export default Watch;

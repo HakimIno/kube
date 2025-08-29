@@ -8,7 +8,7 @@ export const ChannelInfo = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Image
-            src="https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png"
+                            src="/avatar-placeholder.svg"
             alt="Channel Avatar"
             width={48}
             height={48}

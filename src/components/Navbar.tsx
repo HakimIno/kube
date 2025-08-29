@@ -1,14 +1,34 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useSidebarStore } from '@/store/sidebarStore';
+import { useAuth } from '@/context/AuthContext';
 
 export const Navbar = () => {
   const router = useRouter();
   const { toggleCollapse } = useSidebarStore();
+  const { user, logout, isAuthenticated } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showUserMenu]);
 
   const handleLogoClick = () => {
     router.push('/');
@@ -55,30 +75,101 @@ export const Navbar = () => {
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => router.push('/upload')}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors hidden sm:block"
-          >
-            <Icon icon="solar:videocamera-record-linear" className="w-6 h-6" />
-          </button>
-          <button 
-            onClick={() => router.push('/notifications')}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <Icon icon="solar:bell-linear" className="w-6 h-6" />
-          </button>
-          <button 
-            onClick={() => router.push('/profile')}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors"
-          >
-            <Image
-              src="https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png"
-              alt="User Avatar"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-          </button>
+          {isAuthenticated ? (
+            <>
+              <button 
+                onClick={() => router.push('/upload')}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors hidden sm:block"
+              >
+                <Icon icon="solar:videocamera-record-linear" className="w-6 h-6" />
+              </button>
+              <button 
+                onClick={() => router.push('/notifications')}
+                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
+                <Icon icon="solar:bell-linear" className="w-6 h-6" />
+              </button>
+              
+              {/* User Menu */}
+              <div className="relative" ref={userMenuRef}>
+                <button 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors flex items-center gap-2"
+                >
+                  <Image
+                    src={user?.avatar || "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png"}
+                    alt="User Avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                    unoptimized={user?.avatar?.includes('ui-avatars.com')}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png";
+                    }}
+                  />
+                  <span className="text-sm text-white hidden sm:block">{user?.name}</span>
+                  <Icon icon="solar:alt-arrow-down-linear" className="w-4 h-4" />
+                </button>
+                
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src={user?.avatar || "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png"}
+                          alt="User Avatar"
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                          unoptimized={user?.avatar?.includes('ui-avatars.com')}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png";
+                          }}
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                          <p className="text-xs text-gray-500">{user?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => router.push('/profile')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      โปรไฟล์
+                    </button>
+                    <button
+                      onClick={() => router.push('/settings')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      การตั้งค่า
+                    </button>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setShowUserMenu(false);
+                        router.push('/auth/login');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      ออกจากระบบ
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <button 
+              onClick={() => router.push('/auth/login')}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+            >
+              เข้าสู่ระบบ
+            </button>
+          )}
         </div>
       </div>
     </nav>

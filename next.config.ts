@@ -24,6 +24,16 @@ const nextConfig: NextConfig = {
         hostname: 'i.ytimg.com',
         port: '',
       },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+        port: '',
+      },
     ],
   },
 };

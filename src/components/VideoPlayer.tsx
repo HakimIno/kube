@@ -31,11 +31,11 @@ export const VideoPlayer = () => {
   ]
 
   return (
-    <div className="relative rounded-lg overflow-hidden bg-black/50 border border-black">
+    <div className="relative rounded-lg overflow-hidden bg-black/50 border border-black/50">
       <BackgroundElements />
       <MediaPlayer
         src="https://files.vidstack.io/sprite-fight/1080p.mp4"
-        className="w-full aspect-video"
+        className="w-full aspect-video h-full"
         viewType='video'
         streamType='on-demand'
         logLevel='warn'

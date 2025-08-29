@@ -2,14 +2,26 @@
 
 import React from 'react';
 import { MainLayout } from '@/components/MainLayout';
+import { VideoList } from '@/components/VideoList';
+import { videos } from '@/data/videos';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function HistoryPage() {
+  // ในอนาคตจะดึงข้อมูลจาก API หรือ localStorage
+  const historyVideos = videos.slice(1, 7); // ตัวอย่างข้อมูล
+
   return (
-    <MainLayout>
-      <h1 className="text-2xl font-bold mb-6">History</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Add history content here */}
-      </div>
-    </MainLayout>
+    <ProtectedRoute>
+      <MainLayout>
+        <div className="pt-6">
+          <VideoList 
+            videos={historyVideos} 
+            title="Watch History" 
+            layout="list"
+            showChannelInfo={true}
+          />
+        </div>
+      </MainLayout>
+    </ProtectedRoute>
   );
 } 
