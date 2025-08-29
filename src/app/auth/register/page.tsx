@@ -1,5 +1,10 @@
 import Register from '../Register'
+import AuthGuard from '@/components/AuthGuard'
 
 export default function RegisterPage() {
-  return <Register />
+  return (
+    <AuthGuard>
+      <Register />
+    </AuthGuard>
+  )
 } 

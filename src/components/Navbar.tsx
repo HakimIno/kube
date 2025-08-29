@@ -97,15 +97,15 @@ export const Navbar = () => {
                   className="p-2 hover:bg-white/10 rounded-full transition-colors flex items-center gap-2"
                 >
                   <Image
-                    src={user?.avatar || "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png"}
+                    src={user?.avatar || "/avatar-placeholder.svg"}
                     alt="User Avatar"
                     width={32}
                     height={32}
                     className="rounded-full"
-                    unoptimized={user?.avatar?.includes('ui-avatars.com')}
+                    unoptimized={user?.avatar?.includes('ui-avatars.com') || user?.avatar?.includes('example.com')}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png";
+                      target.src = "/avatar-placeholder.svg";
                     }}
                   />
                   <span className="text-sm text-white hidden sm:block">{user?.name}</span>
@@ -118,15 +118,15 @@ export const Navbar = () => {
                     <div className="px-4 py-2 border-b border-gray-100">
                       <div className="flex items-center gap-3">
                         <Image
-                          src={user?.avatar || "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png"}
+                          src={user?.avatar || "/avatar-placeholder.svg"}
                           alt="User Avatar"
                           width={32}
                           height={32}
                           className="rounded-full"
-                          unoptimized={user?.avatar?.includes('ui-avatars.com')}
+                          unoptimized={user?.avatar?.includes('ui-avatars.com') || user?.avatar?.includes('example.com')}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = "https://static-00.iconduck.com/assets.00/user-avatar-happy-icon-2048x2048-ssmbv1ou.png";
+                            target.src = "/avatar-placeholder.svg";
                           }}
                         />
                         <div>
@@ -149,10 +149,17 @@ export const Navbar = () => {
                     </button>
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
-                      onClick={() => {
-                        logout();
-                        setShowUserMenu(false);
-                        router.push('/auth/login');
+                      onClick={async () => {
+                        try {
+                          await logout();
+                          setShowUserMenu(false);
+                          router.push('/auth/login');
+                        } catch (error) {
+                          console.error('Logout error:', error);
+                          // Still redirect to login even if logout fails
+                          setShowUserMenu(false);
+                          router.push('/auth/login');
+                        }
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >

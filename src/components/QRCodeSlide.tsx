@@ -1,12 +1,13 @@
 'use client'
 
 import React from 'react'
-import { QRCodeData } from '@/lib/api'
+import { QRCodeData, QRCodeStatusData } from '@/lib/api'
 import { QRCodeDisplay } from './QRCodeDisplay'
 
 interface QRCodeSlideProps {
   isOpen: boolean
   qrData: QRCodeData | undefined
+  statusData: QRCodeStatusData | null
   isLoading: boolean
   error: Error | null
   onGenerateNew: () => void
@@ -15,10 +16,49 @@ interface QRCodeSlideProps {
 export const QRCodeSlide: React.FC<QRCodeSlideProps> = ({
   isOpen,
   qrData,
+  statusData,
   isLoading,
   error,
   onGenerateNew
 }) => {
+  const getStatusMessage = () => {
+    if (!statusData) return 'Waiting for scan...'
+    
+    switch (statusData.status) {
+      case 'pending':
+        return 'Waiting for scan...'
+      case 'confirmed':
+        return 'Login successful! Redirecting...'
+      case 'rejected':
+        return 'Login rejected. Please try again.'
+      case 'expired':
+        return 'QR code expired. Please generate a new one.'
+      case 'failed':
+        return 'Login failed. Please try again.'
+      default:
+        return 'Unknown status'
+    }
+  }
+
+  const getStatusColor = () => {
+    if (!statusData) return 'text-gray-400'
+    
+    switch (statusData.status) {
+      case 'pending':
+        return 'text-gray-400'
+      case 'confirmed':
+        return 'text-green-400'
+      case 'rejected':
+        return 'text-red-400'
+      case 'expired':
+        return 'text-red-400'
+      case 'failed':
+        return 'text-red-400'
+      default:
+        return 'text-gray-400'
+    }
+  }
+
   return (
     <>
       {/* Slide Panel */}
@@ -53,6 +93,22 @@ export const QRCodeSlide: React.FC<QRCodeSlideProps> = ({
                   onGenerateNew={onGenerateNew}
                 />
               </div>
+
+              {/* Status Display */}
+              {qrData && (
+                <div className="text-center space-y-2">
+                  <div className={`text-sm font-medium ${getStatusColor()}`}>
+                    {getStatusMessage()}
+                  </div>
+
+                  {statusData?.status === 'confirmed' && (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-xs text-green-400">Success!</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

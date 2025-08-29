@@ -7,10 +7,11 @@ import { Icon } from '@iconify/react/dist/iconify.js'
 import { QRCodeSlide } from '@/components/QRCodeSlide'
 import { useQRCodePanel } from '@/hooks/useQRCodePanel'
 import { BorderBeam } from '@/components/magicui/border-beam'
+import { loginUser } from '@/lib/api'
 
 const Login = () => {
     const router = useRouter()
-    const { login } = useAuth()
+    const { loginWithToken } = useAuth()
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -22,6 +23,7 @@ const Login = () => {
     const {
         isOpen,
         qrData,
+        statusData,
         isLoading: qrCodeLoading,
         error,
         togglePanel,
@@ -71,30 +73,22 @@ const Login = () => {
 
         setIsLoading(true)
 
-        // Mock API call - simulate network delay
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            // Call the login API
+            const { token, user, refreshToken } = await loginUser({
+                email: formData.email,
+                password: formData.password
+            })
 
-            // Mock validation - you can change these credentials
-            if (formData.email === 'admin@example.com' && formData.password === '123456') {
-                // Use AuthContext to login
-                login({
-                    id: 1,
-                    email: formData.email,
-                    name: 'Admin User',
-                    avatar: '/avatar-placeholder.svg'
-                })
+            // Use the token to authenticate (including refresh token if available)
+            await loginWithToken(token, refreshToken)
 
-                // Redirect to home page
-                router.push('/')
-            } else {
-                setErrors({
-                    password: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
-                })
-            }
+            // Redirect to home page
+            router.push('/')
         } catch (error) {
+            console.error('Login error:', error)
             setErrors({
-                password: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
+                password: error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
             })
         } finally {
             setIsLoading(false)
@@ -273,6 +267,7 @@ const Login = () => {
                     <QRCodeSlide
                         isOpen={isOpen}
                         qrData={qrData}
+                        statusData={statusData}
                         isLoading={qrCodeLoading}
                         error={error}
                         onGenerateNew={handleGenerateNew}
