@@ -1,7 +1,9 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { getUserMe, UserMeData, refreshToken, logoutUser } from '@/lib/api'
+import { AuthService } from '@/services'
+import { storage, StoredUser } from '@/utils/storage'
+import { UserMeData } from '@/types/auth'
 import { useTokenRefresh } from '@/hooks'
 
 interface User {
@@ -23,7 +25,6 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   token: string | null
-  refreshToken: string | null
   loginWithToken: (token: string, refreshToken?: string) => Promise<void>
   login: (userData: User) => void
   logout: () => Promise<void>
@@ -44,52 +45,67 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
+// Helper function to transform UserMeData to User
+const transformUserData = (userData: UserMeData): User => ({
+  id: userData.id,
+  email: userData.email,
+  name: `${userData.first_name} ${userData.last_name}`.trim() || userData.username,
+  avatar: userData.avatar,
+  username: userData.username,
+  first_name: userData.first_name,
+  last_name: userData.last_name,
+  role: userData.role,
+  is_active: userData.is_active,
+  created_at: userData.created_at,
+  updated_at: userData.updated_at,
+})
+
+// Helper function to transform StoredUser to User
+const transformStoredUser = (storedUser: StoredUser): User => ({
+  id: storedUser.id,
+  email: storedUser.email,
+  name: storedUser.name,
+  avatar: storedUser.avatar,
+  username: storedUser.username,
+  first_name: storedUser.first_name,
+  last_name: storedUser.last_name,
+  role: storedUser.role,
+  is_active: storedUser.is_active,
+  created_at: storedUser.created_at,
+  updated_at: storedUser.updated_at,
+})
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
-  const [refreshTokenValue, setRefreshTokenValue] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Function to update user and token state
-  const updateAuthState = (userData: User, authToken: string, refreshToken?: string) => {
+  // Function to update auth state
+  const updateAuthState = (userData: User, authToken: string) => {
     setUser(userData)
     setToken(authToken)
-    if (refreshToken) {
-      setRefreshTokenValue(refreshToken)
-      localStorage.setItem('refreshToken', refreshToken)
-    }
-    localStorage.setItem('user', JSON.stringify(userData))
-    localStorage.setItem('token', authToken)
   }
 
   // Function to clear auth state
   const clearAuthState = () => {
     setUser(null)
     setToken(null)
-    setRefreshTokenValue(null)
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
+    storage.clearAuth()
   }
 
   useEffect(() => {
     // Check if user is logged in on app start
     const checkAuth = () => {
       try {
-        const storedUser = localStorage.getItem('user')
-        const storedToken = localStorage.getItem('token')
-        const storedRefreshToken = localStorage.getItem('refreshToken')
+        const storedUser = storage.getUser()
+        const storedToken = storage.getToken()
         
         if (storedUser && storedToken) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setToken(storedToken)
-          if (storedRefreshToken) {
-            setRefreshTokenValue(storedRefreshToken)
-          }
+          const user = transformStoredUser(storedUser)
+          updateAuthState(user, storedToken)
         }
       } catch (error) {
-        console.error('Error parsing stored auth data:', error)
+        console.error('Error checking auth state:', error)
         clearAuthState()
       } finally {
         setIsLoading(false)
@@ -103,28 +119,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true)
       
-      // Call the /api/v1/users/me endpoint to get user data
-      const userData: UserMeData = await getUserMe(authToken)
-      
-      // Transform the API response to match our User interface
-      const user: User = {
-        id: userData.id,
-        email: userData.email,
-        name: `${userData.first_name} ${userData.last_name}`.trim() || userData.username,
-        avatar: userData.avatar,
-        username: userData.username,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        role: userData.role,
-        is_active: userData.is_active,
-        created_at: userData.created_at,
-        updated_at: userData.updated_at,
+      // Store token first
+      storage.setToken(authToken)
+      if (refreshToken) {
+        storage.setRefreshToken(refreshToken)
       }
       
-      updateAuthState(user, authToken, refreshToken)
+      // Get user data from API
+      const userData = await AuthService.getUserMe()
+      const user = transformUserData(userData)
+      
+      // Store user data
+      storage.setUser(userData)
+      updateAuthState(user, authToken)
       
     } catch (error) {
       console.error('Error logging in with token:', error)
+      clearAuthState()
       throw error
     } finally {
       setIsLoading(false)
@@ -132,27 +143,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const refreshAuthToken = async () => {
-    if (!token) {
+    const currentToken = storage.getToken()
+    if (!currentToken) {
       throw new Error('No token available to refresh')
     }
 
     try {
-      const { token: newToken, user: userData } = await refreshToken(token)
-      
-      // Transform the API response to match our User interface
-      const user: User = {
-        id: userData.id,
-        email: userData.email,
-        name: `${userData.first_name} ${userData.last_name}`.trim() || userData.username,
-        avatar: userData.avatar,
-        username: userData.username,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        role: userData.role,
-        is_active: userData.is_active,
-        created_at: userData.created_at,
-        updated_at: userData.updated_at,
-      }
+      const { token: newToken, user: userData } = await AuthService.refreshToken(currentToken)
+      const user = transformUserData(userData)
       
       updateAuthState(user, newToken)
       console.log('Token refreshed successfully')
@@ -165,17 +163,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = (userData: User) => {
     setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
   }
 
   const logout = async () => {
     try {
-      // If we have a refresh token, try to logout from server
-      if (refreshTokenValue) {
-        await logoutUser(refreshTokenValue)
-      }
+      await AuthService.logout()
     } catch (error) {
-      console.error('Error during server logout:', error)
+      console.error('Error during logout:', error)
       // Continue with local logout even if server logout fails
     } finally {
       clearAuthState()
@@ -187,7 +181,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated: !!user,
     isLoading,
     token,
-    refreshToken: refreshTokenValue,
     loginWithToken,
     login,
     logout,
