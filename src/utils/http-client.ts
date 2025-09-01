@@ -1,4 +1,4 @@
-import ky from 'ky'
+import ky, { type HTTPError } from 'ky'
 import { API_CONFIG } from '@/config/api'
 import { storage } from '@/utils/storage'
 
@@ -39,7 +39,10 @@ export const authenticatedClient = httpClient.extend({
     beforeRetry: [
       async ({ request, options, error, retryCount }) => {
         // Handle 401 errors by attempting token refresh
-        if (error.response?.status === 401 && retryCount === 1) {
+        const isHTTP = (err: unknown): err is HTTPError =>
+          typeof err === 'object' && err !== null && 'response' in err
+
+        if (isHTTP(error) && error.response?.status === 401 && retryCount === 1) {
           try {
             const currentToken = storage.getToken()
             if (currentToken) {
@@ -57,7 +60,9 @@ export const authenticatedClient = httpClient.extend({
           } catch (refreshError) {
             console.error('Token refresh failed:', refreshError)
             storage.clearAuth()
-            window.location.href = '/auth/login'
+            if (typeof window !== 'undefined') {
+              window.location.href = '/auth/login'
+            }
             return ky.stop
           }
         }
@@ -67,15 +72,20 @@ export const authenticatedClient = httpClient.extend({
 })
 
 // Utility function to handle API errors
-export const handleApiError = (error: any): never => {
-  if (error.response) {
+export const handleApiError = (error: unknown): never => {
+  const isHTTP = (err: unknown): err is HTTPError =>
+    typeof err === 'object' && err !== null && 'response' in err
+
+  if (isHTTP(error)) {
     const status = error.response.status
-    const message = error.message || `HTTP ${status}`
+    const message = (error as Error).message || `HTTP ${status}`
     
     switch (status) {
       case 401:
         storage.clearAuth()
-        window.location.href = '/auth/login'
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login'
+        }
         throw new Error('Authentication required')
       case 403:
         throw new Error('Access denied')

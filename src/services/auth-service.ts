@@ -88,17 +88,15 @@ export class AuthService {
     }
   }
 
-  static async logout(): Promise<void> {
+  static async logout(passedAccessToken?: string, passedRefreshToken?: string): Promise<void> {
     try {
-      const refreshToken = storage.getRefreshToken()
-      if (!refreshToken) {
-        storage.clearAuth()
-        return
-      }
+      const accessToken = passedAccessToken ?? storage.getToken()
+      const refreshToken = passedRefreshToken ?? storage.getRefreshToken()
 
       const responseData: LogoutResponse = await httpClient
         .post(getApiUrl('/api/v1/auth/logout'), {
-          json: { refresh_token: refreshToken },
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+          json: refreshToken ? { refresh_token: refreshToken } : undefined,
         })
         .json()
 

@@ -166,13 +166,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const logout = async () => {
+    const accessToken = storage.getToken()
+    const refreshToken = storage.getRefreshToken()
+    clearAuthState()
+    if (typeof window !== 'undefined') {
+      window.location.replace('/auth/login')
+    }
     try {
-      await AuthService.logout()
+      await AuthService.logout(accessToken || undefined, refreshToken || undefined)
     } catch (error) {
       console.error('Error during logout:', error)
-      // Continue with local logout even if server logout fails
-    } finally {
-      clearAuthState()
     }
   }
 
