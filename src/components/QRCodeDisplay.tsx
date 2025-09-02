@@ -51,26 +51,13 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      {/* QR Code Image */}
+    <div className="space-y-4 ">
       <div className="w-64 h-64 bg-white p-4 rounded-lg shadow-lg flex items-center justify-center">
         <img
           src={qrData.qr_code_image}
           alt="QR Code"
           className="w-full h-full object-contain"
         />
-      </div>
-
-      {/* Session Info */}
-      <div className="text-center space-y-2">
-        <p className="text-xs text-gray-400">
-          Session ID: <span className="font-mono text-gray-300">{qrData.session_id}</span>
-        </p>
-        <p className="text-xs text-gray-400">
-          Expires: <span className="font-mono text-gray-300">
-            {new Date(qrData.expires_at).toLocaleTimeString()}
-          </span>
-        </p>
       </div>
     </div>
   )

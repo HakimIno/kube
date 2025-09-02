@@ -69,7 +69,7 @@ export const QRCodeSlide: React.FC<QRCodeSlideProps> = ({
         >
           {/* Content */}
           <div className="p-6 h-full overflow-y-auto">
-            <div className="space-y-6">
+            <div className="space-y-6 mt-6">
               {/* Instructions */}
               <div className="text-center">
                 <p className="text-gray-300 text-sm mb-2">
@@ -97,7 +97,7 @@ export const QRCodeSlide: React.FC<QRCodeSlideProps> = ({
               {/* Status Display */}
               {qrData && (
                 <div className="text-center space-y-2">
-                  <div className={`text-sm font-medium ${getStatusColor()}`}>
+                  <div className={`text-xs ${getStatusColor()}`}>
                     {getStatusMessage()}
                   </div>
 

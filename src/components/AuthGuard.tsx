@@ -22,10 +22,10 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   // Show loading while checking authentication status
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <span className="text-gray-600">กำลังโหลด...</span>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-black to-indigo-900">
+        <div className="flex flex-col items-center space-x-2 gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600"></div>
+          <span className="text-gray-600 text-xs">กำลังโหลด...</span>
         </div>
       </div>
     )
